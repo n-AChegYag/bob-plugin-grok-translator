@@ -1,12 +1,12 @@
 {
   "identifier": "bob-plugin-grok-translator",
   "category": "translate",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "name": "Grok AI 翻译插件",
   "summary": "使用xAI公司的Grok系列模型进行高质量翻译",
   "author": "Starlight",
   "homepage": "https://github.com/n-AChegYag/bob-plugin-grok-translator",
-  "appcast": "https://raw.githubusercontent.com/n-AChegYag/bob-plugin-grok-translator/main/appcast.json",
+  "appcast": "https://raw.githubusercontent.com/n-AChegYag/bob-plugin-grok-translator/main/main/appcast.json",
   "minBobVersion": "0.5.0",
   "options": [
     {
@@ -36,13 +36,21 @@
       "desc": "选择要使用的Grok模型",
       "menuValues": [
         {
-          "title": "grok-3-fast-beta (功能最强大)",
+          "title": "grok-3-fast-beta",
           "value": "grok-3-fast-beta"
         },
         {
-          "title": "grok-3-mini-fast-beta (速度更快)",
+          "title": "grok-3-beta",
+          "value": "grok-3-beta"
+        },
+        {
+          "title": "grok-3-mini-fast-beta",
           "value": "grok-3-mini-fast-beta"
-        }
+        },
+        {
+          "title": "grok-3-mini-beta",
+          "value": "grok-3-mini-beta"
+        },
       ]
     }
   ]
