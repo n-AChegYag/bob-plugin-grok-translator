@@ -1,0 +1,12 @@
+{
+  "identifier": "bob-plugin-grok-translator",
+  "versions": [
+    {
+      "version": "1.0.1",
+      "desc": "1. 初始版本发布\n2. 支持 xAI 的 Grok 模型进行高质量翻译",
+      "sha256": "请在发布前计算文件的SHA256值",
+      "url": "https://github.com/n-AChegYag/bob-plugin-grok-translator/releases/download/v1.0.1/bob-plugin-grok-translator-v1.0.1.bobplugin",
+      "minBobVersion": "0.10.0"
+    }
+  ]
+}

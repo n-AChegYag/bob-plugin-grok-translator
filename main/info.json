@@ -1,0 +1,49 @@
+{
+  "identifier": "bob-plugin-grok-translator",
+  "category": "translate",
+  "version": "1.0.1",
+  "name": "Grok AI 翻译插件",
+  "summary": "使用xAI公司的Grok系列模型进行高质量翻译",
+  "author": "Starlight",
+  "homepage": "https://github.com/n-AChegYag/bob-plugin-grok-translator",
+  "appcast": "https://raw.githubusercontent.com/n-AChegYag/bob-plugin-grok-translator/main/appcast.json",
+  "minBobVersion": "0.10.0",
+  "options": [
+    {
+      "identifier": "apiKey",
+      "type": "text",
+      "title": "API KEY",
+      "desc": "填写xAI的API KEY",
+      "textConfig": {
+        "placeholderText": "例如: xai-xxxxxxxxxxxxxxxxxxxxxxxx"
+      }
+    },
+    {
+      "identifier": "prompt",
+      "type": "text",
+      "title": "自定义提示词",
+      "desc": "自定义prompt模式，在这里输入你的prompt。源语言为{sourceLang}，目标语言为{targetLang}，原文为{sourceText}。",
+      "textConfig": {
+        "type": "visible",
+        "placeholderText": "请输入prompt"
+      }
+    },
+    {
+      "identifier": "model",
+      "type": "menu",
+      "title": "Grok模型",
+      "defaultValue": "grok-3-fast-beta",
+      "desc": "选择要使用的Grok模型",
+      "menuValues": [
+        {
+          "title": "grok-3-fast-beta (功能最强大)",
+          "value": "grok-3-fast-beta"
+        },
+        {
+          "title": "grok-3-mini-fast-beta (速度更快)",
+          "value": "grok-3-mini-fast-beta"
+        }
+      ]
+    }
+  ]
+}
