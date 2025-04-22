@@ -7,7 +7,7 @@
   "author": "Starlight",
   "homepage": "https://github.com/n-AChegYag/bob-plugin-grok-translator",
   "appcast": "https://raw.githubusercontent.com/n-AChegYag/bob-plugin-grok-translator/main/appcast.json",
-  "minBobVersion": "0.10.0",
+  "minBobVersion": "0.5.0",
   "options": [
     {
       "identifier": "apiKey",
