@@ -27,9 +27,8 @@ A translation plugin for [Bob](https://bobtranslate.com/) that utilizes xAI's Gr
 
 1. Open Bob preferences
 2. Go to the "Translation" tab
-3. Find the "Grok Translation" service
-4. Click the "⚙️" icon to configure the service
-5. Enter your Grok API key
+3. Find the "Grok AI Translation Plugin" service
+4. Enter your Grok API key
 
 ## Usage
 
