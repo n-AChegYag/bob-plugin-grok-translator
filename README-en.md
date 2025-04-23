@@ -93,14 +93,15 @@ All forms of contributions are welcome!
 
 ### ✨ Adding Support for Other Language Models
 
-This plugin is designed with extensibility in mind, making it easy to add support for other companies' language models. If you would like to contribute a new translation service provider, follow these steps:
+This plugin already supports language models from multiple companies. To add support for new language models, please follow these steps:
 
-1.  **Create a New Service File**: In the `src/` directory, create a new JavaScript file (e.g., `new_model.js`) following the structure of `grok.js`.
-2.  **Implement Translation Logic**: In the new file, implement the logic to interact with the target language model API, including the necessary functions such as `translate`, and follow the Bob plugin API specifications.
-3.  **Update `info.json`**: Modify the `info.json` file to add new service configurations or adjust existing ones as needed.
-4.  **Update `app.js` (if needed)**: If the new model requires different initialization or processing logic, you may need to modify the `app.js` file.
-5.  **Test**: Ensure the new language model integration works properly.
-6.  **Submit a Pull Request**: Follow the code contribution process outlined above to submit your changes.
+1. **Understand Bob Plugin Architecture**: First, familiarize yourself with the basic architecture and working principles of Bob plugins.
+2. **Review Existing Model Implementations**: Reference the code of already implemented language models to understand how to interact with various APIs.
+3. **Add New Model Configuration**: Add relevant parameters for the new model in the configuration files, including API endpoints, authentication methods, etc.
+4. **Implement API Calls**: Implement specific API call logic for the new model, ensuring proper handling of requests and responses.
+5. **Add User Interface Options**: Update the user interface to allow users to select and configure the newly added language model.
+6. **Test Functionality**: Thoroughly test the translation functionality of the newly added model to ensure accurate and stable results.
+7. **Submit a Pull Request**: Follow the code contribution process outlined above to submit your changes.
 
 We encourage community members to expand the functionality of this plugin by integrating more excellent translation engines!
 
