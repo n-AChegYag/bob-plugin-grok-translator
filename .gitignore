@@ -22,6 +22,7 @@ yarn.lock
 
 # Bob Plugin
 *.bobplugin
+*.zip
 build/
 dist/
 
