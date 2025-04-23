@@ -348,20 +348,43 @@ function useRecords(query) {
 }
 
 // 获取API KEY
-function getApiKey() {
-    const { apiKey } = $option;
-    return apiKey;
+function getApiKey(provider) {
+    provider = provider || $option.provider || "xAI";
+    
+    // 根据不同的提供商返回对应的API Key
+    switch (provider) {
+        case 'xAI':
+            return $option.xAIApiKey || "";
+        case 'OpenAI':
+            return $option.openAIApiKey || "";
+        case 'Anthropic':
+            return $option.anthropicApiKey || "";
+        case 'Google':
+            return $option.googleApiKey || "";
+        case 'DeepSeek':
+            return $option.deepSeekApiKey || "";
+        case 'Custom':
+            return $option.customApiKey || "";
+        default:
+            return $option.apiKey || ""; // 兼容旧版本
+    }
 }
 
 // 获取基础URL
 function getApiBaseUrl(provider) {
-    const { apiBase } = $option;
-    // 如果用户设置了自定义API Base URL，则使用用户设置的
-    if (apiBase && apiBase.trim() !== "") {
-        return apiBase.trim();
+    provider = provider || $option.provider || "xAI";
+    
+    // 自定义提供商优先使用customApiBase字段
+    if (provider === 'Custom') {
+        return $option.customApiBase || "";
     }
     
-    // 否则使用默认URL
+    // 全局API基础URL设置，如果设置了则覆盖默认值
+    if ($option.apiBase && $option.apiBase.trim() !== "") {
+        return $option.apiBase.trim();
+    }
+    
+    // 使用默认的API URL
     return API_URLS[provider];
 }
 
@@ -378,6 +401,8 @@ function getSelectedModel(provider) {
             return $option.googleModel || "gemini-2.0-flash";
         case 'DeepSeek':
             return $option.deepSeekModel || "deepseek-chat";
+        case 'Custom':
+            return $option.customModelName || "custom-model";
         default:
             return "grok-3-fast-beta"; // 默认
     }
@@ -386,6 +411,11 @@ function getSelectedModel(provider) {
 // 检查API KEY格式
 function checkApiKeyFormat(provider, apiKey) {
     if (!apiKey) return false;
+    
+    // 自定义提供商只需要API Key不为空即可
+    if (provider === 'Custom') {
+        return apiKey.length > 0;
+    }
     
     switch (provider) {
         case 'xAI':
@@ -399,137 +429,9 @@ function checkApiKeyFormat(provider, apiKey) {
         case 'DeepSeek':
             return apiKey.startsWith('sk-');
         default:
-            return false;
+            return apiKey.length > 0; // 兼容旧版本
     }
 }
-
-// 准备API请求参数
-function useParams(query, provider) {
-    const selectedModel = getSelectedModel(provider);
-    const prompt = generatePrompt(query);
-    const systemPrompt = generateSystemPrompt(query);
-    
-    // 不同提供商的请求格式不同
-    switch (provider) {
-        case 'xAI':
-        case 'OpenAI':
-        case 'DeepSeek':
-            return {
-                params: {
-                    model: selectedModel,
-                    messages: [
-                        {
-                            role: "system",
-                            content: systemPrompt,
-                        },
-                        {
-                            role: "user",
-                            content: prompt,
-                        },
-                    ],
-                }
-            };
-            
-        case 'Anthropic':
-            return {
-                params: {
-                    model: selectedModel,
-                    messages: [
-                        {
-                            role: "user",
-                            content: prompt,
-                        }
-                    ],
-                    system: systemPrompt,
-                }
-            };
-            
-        case 'Google':
-            return {
-                params: {
-                    contents: [
-                        {
-                            role: "user",
-                            parts: [{ text: prompt }]
-                        }
-                    ],
-                    systemInstruction: {
-                        parts: [{ text: systemPrompt }]
-                    }
-                }
-            };
-            
-        default:
-            throw new Error(`不支持的AI提供商: ${provider}`);
-    }
-}
-
-// 从API响应中提取内容
-function extractContentFromResponse(data, provider) {
-    try {
-        switch (provider) {
-            case 'xAI':
-            case 'OpenAI':
-            case 'DeepSeek':
-                return data.choices[0].message.content;
-                
-            case 'Anthropic':
-                return data.content[0].text;
-                
-            case 'Google':
-                return data.candidates[0].content.parts[0].text;
-                
-            default:
-                throw new Error(`不支持的AI提供商: ${provider}`);
-        }
-    } catch (error) {
-        throw new Error(`解析${provider}响应失败: ${error.message}`);
-    }
-}
-
-// 预检查配置是否正确
-const preCheck = (query, completion) => {
-    const provider = $option.provider || "xAI";
-    const apiKey = getApiKey();
-    
-    // 检查API Key
-    if (!apiKey) {
-        completion({
-            error: {
-                type: "param",
-                message: `配置错误 - 请确保您在插件配置中填入了正确的${provider} API Key`,
-                addition: `${provider} API Key不能为空`,
-            },
-        });
-        return false;
-    }
-    
-    // 检查API Key格式
-    if (!checkApiKeyFormat(provider, apiKey)) {
-        completion({
-            error: {
-                type: "param",
-                message: `API Key格式错误 - ${provider}的API Key格式不正确`,
-                addition: "请检查您的API Key是否正确",
-            },
-        });
-        return false;
-    }
-    
-    // 检查目标语言是否支持
-    if (!langMap.get(query.detectTo)) {
-        completion({
-            error: {
-                type: "unsupportedLanguage",
-                message: "不支持该语种",
-                addition: `不支持的目标语种: ${query.detectTo}`,
-            },
-        });
-        return false;
-    }
-    
-    return true;
-};
 
 // 获取API请求header
 function getHeaders(provider, apiKey) {
@@ -537,6 +439,14 @@ function getHeaders(provider, apiKey) {
         "Content-Type": "application/json",
         "X-Title": "Bob翻译插件"
     };
+    
+    // 自定义提供商默认使用Bearer Token认证（最常见）
+    if (provider === 'Custom') {
+        return {
+            ...commonHeaders,
+            "Authorization": `Bearer ${apiKey}`
+        };
+    }
     
     switch (provider) {
         case 'xAI':
@@ -565,6 +475,78 @@ function getHeaders(provider, apiKey) {
     }
 }
 
+// 预检查配置是否正确
+const preCheck = (query, completion) => {
+    const provider = $option.provider || "xAI";
+    const apiKey = getApiKey(provider);
+    
+    // 检查API Key
+    if (!apiKey) {
+        completion({
+            error: {
+                type: "param",
+                message: `配置错误 - 请确保您在插件配置中填入了正确的${provider} API Key`,
+                addition: `${provider} API Key不能为空`,
+            },
+        });
+        return false;
+    }
+    
+    // 检查API Key格式
+    if (!checkApiKeyFormat(provider, apiKey)) {
+        completion({
+            error: {
+                type: "param",
+                message: `API Key格式错误 - ${provider}的API Key格式不正确`,
+                addition: "请检查您的API Key是否正确",
+            },
+        });
+        return false;
+    }
+    
+    // 自定义提供商需要检查API基础URL
+    if (provider === 'Custom') {
+        const apiBase = getApiBaseUrl(provider);
+        if (!apiBase) {
+            completion({
+                error: {
+                    type: "param",
+                    message: `配置错误 - 使用自定义提供商时必须填写API基础URL`,
+                    addition: "请在插件配置中填写自定义API基础URL",
+                },
+            });
+            return false;
+        }
+        
+        // 检查模型名称
+        const modelName = getSelectedModel(provider);
+        if (!modelName) {
+            completion({
+                error: {
+                    type: "param",
+                    message: `配置错误 - 使用自定义提供商时必须填写模型名称`,
+                    addition: "请在插件配置中填写自定义模型名称",
+                },
+            });
+            return false;
+        }
+    }
+    
+    // 检查目标语言是否支持
+    if (!langMap.get(query.detectTo)) {
+        completion({
+            error: {
+                type: "unsupportedLanguage",
+                message: "不支持该语种",
+                addition: `不支持的目标语种: ${query.detectTo}`,
+            },
+        });
+        return false;
+    }
+    
+    return true;
+};
+
 // 获取完整的API URL
 function getFullApiUrl(provider, model) {
     const baseUrl = getApiBaseUrl(provider);
@@ -580,6 +562,16 @@ function getFullApiUrl(provider, model) {
 // 检查API错误响应
 function checkErrorResponse(provider, resp) {
     if (resp.data) {
+        // 自定义提供商通用错误检测
+        if (provider === 'Custom' && resp.data.error) {
+            let errorMsg = typeof resp.data.error === 'string' ? resp.data.error : JSON.stringify(resp.data.error);
+            return {
+                type: "api",
+                message: `API错误 - ${errorMsg}`,
+                addition: "请检查自定义API配置和模型名称是否正确"
+            };
+        }
+        
         if (provider === 'xAI' && resp.data.error && resp.data.error.includes("Invalid token")) {
             return {
                 type: "secretKey",
@@ -629,10 +621,66 @@ function checkErrorResponse(provider, resp) {
     };
 }
 
+// 从API响应中提取内容
+function extractContentFromResponse(data, provider) {
+    try {
+        // 自定义提供商的响应解析逻辑
+        if (provider === 'Custom') {
+            // 尝试OpenAI格式
+            if (data.choices && data.choices[0] && data.choices[0].message) {
+                return data.choices[0].message.content;
+            }
+            // 尝试Anthropic格式
+            if (data.content && data.content[0] && data.content[0].text) {
+                return data.content[0].text;
+            }
+            // 尝试Google格式
+            if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
+                return data.candidates[0].content.parts[0].text;
+            }
+            // 尝试直接文本字段
+            if (data.text) {
+                return data.text;
+            }
+            if (data.result) {
+                return typeof data.result === 'string' ? data.result : JSON.stringify(data.result);
+            }
+            if (data.translation) {
+                return data.translation;
+            }
+            if (data.translated_text) {
+                return data.translated_text;
+            }
+            
+            // 实在找不到，返回整个响应的字符串形式
+            return JSON.stringify(data);
+        }
+        
+        // 标准提供商的响应解析
+        switch (provider) {
+            case 'xAI':
+            case 'OpenAI':
+            case 'DeepSeek':
+                return data.choices[0].message.content;
+                
+            case 'Anthropic':
+                return data.content[0].text;
+                
+            case 'Google':
+                return data.candidates[0].content.parts[0].text;
+                
+            default:
+                throw new Error(`不支持的AI提供商: ${provider}`);
+        }
+    } catch (error) {
+        throw new Error(`解析${provider}响应失败: ${error.message}`);
+    }
+}
+
 // Bob插件标准翻译函数
 function translate(query, completion) {
     const provider = $option.provider || "xAI";
-    const apiKey = getApiKey();
+    const apiKey = getApiKey(provider);
     const { addRecord, getRecord, hasRecord } = useRecords(query);
     
     // 如果有缓存，直接返回
@@ -723,8 +771,8 @@ function translate(query, completion) {
                             type: "api",
                             message: "API返回的数据为空",
                             addition: "请重试或联系开发者"
-                        }
-                    });
+                        });
+                    }
                 }
             }
         });

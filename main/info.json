@@ -35,17 +35,12 @@
         {
           "title": "DeepSeek",
           "value": "DeepSeek"
+        },
+        {
+          "title": "自定义提供商",
+          "value": "Custom"
         }
       ]
-    },
-    {
-      "identifier": "apiKey",
-      "type": "text",
-      "title": "API KEY",
-      "desc": "填写所选AI提供商的API KEY",
-      "textConfig": {
-        "placeholderText": "例如: xai-xxx, sk-xxx, anthropic-xxx等"
-      }
     },
     {
       "identifier": "prompt",
@@ -55,6 +50,19 @@
       "textConfig": {
         "type": "visible",
         "placeholderText": "请输入prompt"
+      }
+    },
+    {
+      "identifier": "xAIApiKey",
+      "type": "text",
+      "title": "xAI API Key",
+      "desc": "填写xAI的API KEY",
+      "textConfig": {
+        "placeholderText": "例如: xai-xxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "dependsOn": {
+        "identifier": "provider",
+        "value": "xAI"
       }
     },
     {
@@ -80,7 +88,24 @@
           "title": "grok-3-mini-fast-beta",
           "value": "grok-3-mini-fast-beta"
         }
-      ]
+      ],
+      "dependsOn": {
+        "identifier": "provider",
+        "value": "xAI"
+      }
+    },
+    {
+      "identifier": "openAIApiKey",
+      "type": "text",
+      "title": "OpenAI API Key",
+      "desc": "填写OpenAI的API KEY",
+      "textConfig": {
+        "placeholderText": "例如: sk-xxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "dependsOn": {
+        "identifier": "provider",
+        "value": "OpenAI"
+      }
     },
     {
       "identifier": "openAIModel",
@@ -121,7 +146,24 @@
           "title": "o1-mini",
           "value": "o1-mini"
         }
-      ]
+      ],
+      "dependsOn": {
+        "identifier": "provider",
+        "value": "OpenAI"
+      }
+    },
+    {
+      "identifier": "anthropicApiKey",
+      "type": "text",
+      "title": "Anthropic API Key",
+      "desc": "填写Anthropic的API KEY",
+      "textConfig": {
+        "placeholderText": "例如: sk-ant-xxxx 或 anthropic-xxxx"
+      },
+      "dependsOn": {
+        "identifier": "provider",
+        "value": "Anthropic"
+      }
     },
     {
       "identifier": "anthropicModel",
@@ -138,7 +180,24 @@
           "title": "Claude 3.7 Sonnet",
           "value": "claude-3-7-sonnet-latest"
         }
-      ]
+      ],
+      "dependsOn": {
+        "identifier": "provider",
+        "value": "Anthropic"
+      }
+    },
+    {
+      "identifier": "googleApiKey",
+      "type": "text",
+      "title": "Google API Key",
+      "desc": "填写Google的API KEY",
+      "textConfig": {
+        "placeholderText": "请输入Google API Key"
+      },
+      "dependsOn": {
+        "identifier": "provider",
+        "value": "Google"
+      }
     },
     {
       "identifier": "googleModel",
@@ -167,7 +226,24 @@
           "title": "Gemini 2.5 Pro Preview (03-25)",
           "value": "gemini-2.5-pro-preview-03-25"
         }
-      ]
+      ],
+      "dependsOn": {
+        "identifier": "provider",
+        "value": "Google"
+      }
+    },
+    {
+      "identifier": "deepSeekApiKey",
+      "type": "text",
+      "title": "DeepSeek API Key",
+      "desc": "填写DeepSeek的API KEY",
+      "textConfig": {
+        "placeholderText": "例如: sk-xxxxxxxxxxxxxxxxxxxxxxxx"
+      },
+      "dependsOn": {
+        "identifier": "provider",
+        "value": "DeepSeek"
+      }
     },
     {
       "identifier": "deepSeekModel",
@@ -184,13 +260,56 @@
           "title": "DeepSeek Reasoner",
           "value": "deepseek-reasoner"
         }
-      ]
+      ],
+      "dependsOn": {
+        "identifier": "provider",
+        "value": "DeepSeek"
+      }
+    },
+    {
+      "identifier": "customApiKey",
+      "type": "text",
+      "title": "自定义API Key",
+      "desc": "填写自定义提供商的API KEY",
+      "textConfig": {
+        "placeholderText": "例如: sk-xxx、token-xxx等"
+      },
+      "dependsOn": {
+        "identifier": "provider",
+        "value": "Custom"
+      }
+    },
+    {
+      "identifier": "customApiBase",
+      "type": "text",
+      "title": "自定义API基础URL",
+      "desc": "输入自定义API基础URL",
+      "textConfig": {
+        "placeholderText": "例如: https://api.example.com/v1/chat/completions"
+      },
+      "dependsOn": {
+        "identifier": "provider",
+        "value": "Custom"
+      }
+    },
+    {
+      "identifier": "customModelName",
+      "type": "text",
+      "title": "自定义模型名称",
+      "desc": "输入自定义模型的名称",
+      "textConfig": {
+        "placeholderText": "例如: custom-model"
+      },
+      "dependsOn": {
+        "identifier": "provider",
+        "value": "Custom"
+      }
     },
     {
       "identifier": "apiBase",
       "type": "text",
-      "title": "API基础URL(可选)",
-      "desc": "如果使用第三方代理服务，可以在此设置API基础URL",
+      "title": "全局API基础URL(可选)",
+      "desc": "可选的全局API基础URL设置，将覆盖默认API URL",
       "textConfig": {
         "placeholderText": "例如: https://api.example.com/v1"
       }
