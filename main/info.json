@@ -17,7 +17,7 @@
       "desc": "选择要使用的AI提供商",
       "menuValues": [
         {
-          "title": "xAI (Grok)",
+          "title": "xAI",
           "value": "xAI"
         },
         {
@@ -25,7 +25,7 @@
           "value": "OpenAI"
         },
         {
-          "title": "Anthropic (Claude)",
+          "title": "Anthropic",
           "value": "Anthropic"
         },
         {
@@ -68,7 +68,7 @@
     {
       "identifier": "xAIModel",
       "type": "menu",
-      "title": "xAI (Grok)模型",
+      "title": "xAI",
       "defaultValue": "grok-3-fast-beta",
       "desc": "选择要使用的Grok模型",
       "menuValues": [
@@ -110,7 +110,7 @@
     {
       "identifier": "openAIModel",
       "type": "menu",
-      "title": "OpenAI模型",
+      "title": "OpenAI",
       "defaultValue": "gpt-4o",
       "desc": "选择要使用的OpenAI模型",
       "menuValues": [
@@ -168,7 +168,7 @@
     {
       "identifier": "anthropicModel",
       "type": "menu",
-      "title": "Anthropic (Claude)模型",
+      "title": "Anthropic",
       "defaultValue": "claude-3-7-sonnet-latest",
       "desc": "选择要使用的Anthropic模型",
       "menuValues": [
@@ -202,7 +202,7 @@
     {
       "identifier": "googleModel",
       "type": "menu",
-      "title": "Google模型",
+      "title": "Google",
       "defaultValue": "gemini-2.0-flash",
       "desc": "选择要使用的Google模型",
       "menuValues": [
@@ -248,7 +248,7 @@
     {
       "identifier": "deepSeekModel",
       "type": "menu",
-      "title": "DeepSeek模型",
+      "title": "DeepSeek",
       "defaultValue": "deepseek-chat",
       "desc": "选择要使用的DeepSeek模型",
       "menuValues": [
