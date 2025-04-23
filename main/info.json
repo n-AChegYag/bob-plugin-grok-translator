@@ -4,7 +4,7 @@
   "version": "1.1.0",
   "name": "AI模型翻译插件",
   "summary": "使用多种AI模型(xAI、OpenAI、Google、Anthropic、DeepSeek)进行高质量翻译",
-  "author": "Starlight",
+  "author": "n-AChegYag",
   "homepage": "https://github.com/n-AChegYag/bob-plugin-grok-translator",
   "appcast": "https://raw.githubusercontent.com/n-AChegYag/bob-plugin-grok-translator/main/main/appcast.json",
   "minBobVersion": "0.5.0",
