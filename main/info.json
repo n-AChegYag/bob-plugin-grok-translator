@@ -1,21 +1,50 @@
 {
   "identifier": "bob-plugin-grok-translator",
   "category": "translate",
-  "version": "1.0.2",
-  "name": "Grok AI 翻译插件",
-  "summary": "使用xAI公司的Grok系列模型进行高质量翻译",
+  "version": "1.1.0",
+  "name": "AI模型翻译插件",
+  "summary": "使用多种AI模型(xAI、OpenAI、Google、Anthropic、DeepSeek)进行高质量翻译",
   "author": "Starlight",
   "homepage": "https://github.com/n-AChegYag/bob-plugin-grok-translator",
   "appcast": "https://raw.githubusercontent.com/n-AChegYag/bob-plugin-grok-translator/main/main/appcast.json",
   "minBobVersion": "0.5.0",
   "options": [
     {
+      "identifier": "provider",
+      "type": "menu",
+      "title": "AI提供商",
+      "defaultValue": "xAI",
+      "desc": "选择要使用的AI提供商",
+      "menuValues": [
+        {
+          "title": "xAI (Grok)",
+          "value": "xAI"
+        },
+        {
+          "title": "OpenAI",
+          "value": "OpenAI"
+        },
+        {
+          "title": "Anthropic (Claude)",
+          "value": "Anthropic"
+        },
+        {
+          "title": "Google",
+          "value": "Google"
+        },
+        {
+          "title": "DeepSeek",
+          "value": "DeepSeek"
+        }
+      ]
+    },
+    {
       "identifier": "apiKey",
       "type": "text",
       "title": "API KEY",
-      "desc": "填写xAI的API KEY",
+      "desc": "填写所选AI提供商的API KEY",
       "textConfig": {
-        "placeholderText": "例如: xai-xxxxxxxxxxxxxxxxxxxxxxxx"
+        "placeholderText": "例如: xai-xxx, sk-xxx, anthropic-xxx等"
       }
     },
     {
@@ -29,29 +58,142 @@
       }
     },
     {
-      "identifier": "model",
+      "identifier": "xAIModel",
       "type": "menu",
-      "title": "Grok模型",
+      "title": "xAI (Grok)模型",
       "defaultValue": "grok-3-fast-beta",
       "desc": "选择要使用的Grok模型",
       "menuValues": [
-        {
-          "title": "grok-3-fast-beta",
-          "value": "grok-3-fast-beta"
-        },
         {
           "title": "grok-3-beta",
           "value": "grok-3-beta"
         },
         {
-          "title": "grok-3-mini-fast-beta",
-          "value": "grok-3-mini-fast-beta"
+          "title": "grok-3-fast-beta",
+          "value": "grok-3-fast-beta"
         },
         {
           "title": "grok-3-mini-beta",
           "value": "grok-3-mini-beta"
         },
+        {
+          "title": "grok-3-mini-fast-beta",
+          "value": "grok-3-mini-fast-beta"
+        }
       ]
+    },
+    {
+      "identifier": "openAIModel",
+      "type": "menu",
+      "title": "OpenAI模型",
+      "defaultValue": "gpt-4o",
+      "desc": "选择要使用的OpenAI模型",
+      "menuValues": [
+        {
+          "title": "GPT-4o",
+          "value": "gpt-4o"
+        },
+        {
+          "title": "GPT-4o-mini",
+          "value": "gpt-4o-mini"
+        },
+        {
+          "title": "GPT-4.1",
+          "value": "gpt-4.1"
+        },
+        {
+          "title": "GPT-4.1-mini",
+          "value": "gpt-4.1-mini"
+        },
+        {
+          "title": "GPT-4.1-nano",
+          "value": "gpt-4.1-nano"
+        },
+        {
+          "title": "GPT-4.5-preview",
+          "value": "gpt-4.5-preview"
+        },
+        {
+          "title": "o1-preview",
+          "value": "o1-preview"
+        },
+        {
+          "title": "o1-mini",
+          "value": "o1-mini"
+        }
+      ]
+    },
+    {
+      "identifier": "anthropicModel",
+      "type": "menu",
+      "title": "Anthropic (Claude)模型",
+      "defaultValue": "claude-3-7-sonnet-latest",
+      "desc": "选择要使用的Anthropic模型",
+      "menuValues": [
+        {
+          "title": "Claude 3.5 Haiku",
+          "value": "claude-3-5-haiku-latest"
+        },
+        {
+          "title": "Claude 3.7 Sonnet",
+          "value": "claude-3-7-sonnet-latest"
+        }
+      ]
+    },
+    {
+      "identifier": "googleModel",
+      "type": "menu",
+      "title": "Google模型",
+      "defaultValue": "gemini-2.0-flash",
+      "desc": "选择要使用的Google模型",
+      "menuValues": [
+        {
+          "title": "Gemini 1.5 Pro",
+          "value": "gemini-1.5-pro"
+        },
+        {
+          "title": "Gemini 1.5 Flash",
+          "value": "gemini-1.5-flash"
+        },
+        {
+          "title": "Gemini 2.0 Flash",
+          "value": "gemini-2.0-flash"
+        },
+        {
+          "title": "Gemini 2.5 Flash Preview (04-17)",
+          "value": "gemini-2.5-flash-preview-04-17"
+        },
+        {
+          "title": "Gemini 2.5 Pro Preview (03-25)",
+          "value": "gemini-2.5-pro-preview-03-25"
+        }
+      ]
+    },
+    {
+      "identifier": "deepSeekModel",
+      "type": "menu",
+      "title": "DeepSeek模型",
+      "defaultValue": "deepseek-chat",
+      "desc": "选择要使用的DeepSeek模型",
+      "menuValues": [
+        {
+          "title": "DeepSeek Chat",
+          "value": "deepseek-chat"
+        },
+        {
+          "title": "DeepSeek Reasoner",
+          "value": "deepseek-reasoner"
+        }
+      ]
+    },
+    {
+      "identifier": "apiBase",
+      "type": "text",
+      "title": "API基础URL(可选)",
+      "desc": "如果使用第三方代理服务，可以在此设置API基础URL",
+      "textConfig": {
+        "placeholderText": "例如: https://api.example.com/v1"
+      }
     }
   ]
 }

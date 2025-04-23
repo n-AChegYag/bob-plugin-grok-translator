@@ -1,7 +1,15 @@
 'use strict';
 
-// 去掉不必要的lang.js引用
 // var lang = require('./lang.js');
+
+// 定义各AI提供商的API URL
+const API_URLS = {
+    xAI: "https://api.x.ai/v1/chat/completions",
+    OpenAI: "https://api.openai.com/v1/chat/completions",
+    Anthropic: "https://api.anthropic.com/v1/messages",
+    Google: "https://generativelanguage.googleapis.com/v1beta/models/",
+    DeepSeek: "https://api.deepseek.com/v1/chat/completions"
+};
 
 const HTTP_ERROR_CODES = {
     400: "Bad Request",
@@ -30,7 +38,7 @@ const HTTP_ERROR_CODES = {
     425: "Too Early",
     426: "Upgrade Required",
     428: "Precondition Required",
-    429: "请求过于频繁，请慢一点。xAI 对您在 API 上的请求实施速率限制。",
+    429: "请求过于频繁，请慢一点。API 对您的请求实施速率限制。",
     431: "Request Header Fields Too Large",
     451: "Unavailable For Legal Reasons",
     500: "Internal Server Error",
@@ -163,9 +171,6 @@ const SupportLanguages = [
     ["yo", "yo"],
     ["zu", "zu"],
 ];
-
-// Grok API基本URL
-const GROK_API_URL = "https://api.x.ai/v1/chat/completions";
 
 // 获取支持的语种 - 必须按Bob插件规范导出
 function supportLanguages() {
@@ -342,28 +347,169 @@ function useRecords(query) {
     };
 }
 
+// 获取API KEY
+function getApiKey() {
+    const { apiKey } = $option;
+    return apiKey;
+}
+
+// 获取基础URL
+function getApiBaseUrl(provider) {
+    const { apiBase } = $option;
+    // 如果用户设置了自定义API Base URL，则使用用户设置的
+    if (apiBase && apiBase.trim() !== "") {
+        return apiBase.trim();
+    }
+    
+    // 否则使用默认URL
+    return API_URLS[provider];
+}
+
+// 获取选中的AI模型
+function getSelectedModel(provider) {
+    switch (provider) {
+        case 'xAI':
+            return $option.xAIModel || "grok-3-fast-beta";
+        case 'OpenAI':
+            return $option.openAIModel || "gpt-4o";
+        case 'Anthropic':
+            return $option.anthropicModel || "claude-3-7-sonnet-latest";
+        case 'Google':
+            return $option.googleModel || "gemini-2.0-flash";
+        case 'DeepSeek':
+            return $option.deepSeekModel || "deepseek-chat";
+        default:
+            return "grok-3-fast-beta"; // 默认
+    }
+}
+
+// 检查API KEY格式
+function checkApiKeyFormat(provider, apiKey) {
+    if (!apiKey) return false;
+    
+    switch (provider) {
+        case 'xAI':
+            return apiKey.startsWith('xai-');
+        case 'OpenAI':
+            return apiKey.startsWith('sk-');
+        case 'Anthropic':
+            return apiKey.startsWith('sk-ant-') || apiKey.startsWith('anthropic-');
+        case 'Google':
+            return apiKey.length > 10; // Google API key没有特定前缀
+        case 'DeepSeek':
+            return apiKey.startsWith('sk-');
+        default:
+            return false;
+    }
+}
+
+// 准备API请求参数
+function useParams(query, provider) {
+    const selectedModel = getSelectedModel(provider);
+    const prompt = generatePrompt(query);
+    const systemPrompt = generateSystemPrompt(query);
+    
+    // 不同提供商的请求格式不同
+    switch (provider) {
+        case 'xAI':
+        case 'OpenAI':
+        case 'DeepSeek':
+            return {
+                params: {
+                    model: selectedModel,
+                    messages: [
+                        {
+                            role: "system",
+                            content: systemPrompt,
+                        },
+                        {
+                            role: "user",
+                            content: prompt,
+                        },
+                    ],
+                }
+            };
+            
+        case 'Anthropic':
+            return {
+                params: {
+                    model: selectedModel,
+                    messages: [
+                        {
+                            role: "user",
+                            content: prompt,
+                        }
+                    ],
+                    system: systemPrompt,
+                }
+            };
+            
+        case 'Google':
+            return {
+                params: {
+                    contents: [
+                        {
+                            role: "user",
+                            parts: [{ text: prompt }]
+                        }
+                    ],
+                    systemInstruction: {
+                        parts: [{ text: systemPrompt }]
+                    }
+                }
+            };
+            
+        default:
+            throw new Error(`不支持的AI提供商: ${provider}`);
+    }
+}
+
+// 从API响应中提取内容
+function extractContentFromResponse(data, provider) {
+    try {
+        switch (provider) {
+            case 'xAI':
+            case 'OpenAI':
+            case 'DeepSeek':
+                return data.choices[0].message.content;
+                
+            case 'Anthropic':
+                return data.content[0].text;
+                
+            case 'Google':
+                return data.candidates[0].content.parts[0].text;
+                
+            default:
+                throw new Error(`不支持的AI提供商: ${provider}`);
+        }
+    } catch (error) {
+        throw new Error(`解析${provider}响应失败: ${error.message}`);
+    }
+}
+
 // 预检查配置是否正确
 const preCheck = (query, completion) => {
-    const { apiKey } = $option;
+    const provider = $option.provider || "xAI";
+    const apiKey = getApiKey();
     
     // 检查API Key
     if (!apiKey) {
         completion({
             error: {
                 type: "param",
-                message: "配置错误 - 请确保您在插件配置中填入了正确的xAI API Key",
-                addition: "API Key格式应为: xai-xxxxxxxxxxxxxxxxxxxxxxxx",
+                message: `配置错误 - 请确保您在插件配置中填入了正确的${provider} API Key`,
+                addition: `${provider} API Key不能为空`,
             },
         });
         return false;
     }
     
     // 检查API Key格式
-    if (!apiKey.startsWith('xai-')) {
+    if (!checkApiKeyFormat(provider, apiKey)) {
         completion({
             error: {
                 type: "param",
-                message: "API Key格式错误 - xAI的API Key应以xai-开头",
+                message: `API Key格式错误 - ${provider}的API Key格式不正确`,
                 addition: "请检查您的API Key是否正确",
             },
         });
@@ -385,34 +531,109 @@ const preCheck = (query, completion) => {
     return true;
 };
 
-// 准备API请求参数
-function useParams(query) {
-    const { model } = $option;
-    
-    const params = {
-        model: model || "grok-3-fast-beta",
-        messages: [
-            {
-                role: "system",
-                content: generateSystemPrompt(query),
-            },
-            {
-                role: "user",
-                content: generatePrompt(query),
-            },
-        ],
+// 获取API请求header
+function getHeaders(provider, apiKey) {
+    const commonHeaders = {
+        "Content-Type": "application/json",
+        "X-Title": "Bob翻译插件"
     };
     
+    switch (provider) {
+        case 'xAI':
+        case 'OpenAI':
+        case 'DeepSeek':
+            return {
+                ...commonHeaders,
+                "Authorization": `Bearer ${apiKey}`
+            };
+        
+        case 'Anthropic':
+            return {
+                ...commonHeaders,
+                "x-api-key": apiKey,
+                "anthropic-version": "2023-06-01"
+            };
+            
+        case 'Google':
+            return {
+                ...commonHeaders,
+                "x-goog-api-key": apiKey
+            };
+            
+        default:
+            return commonHeaders;
+    }
+}
+
+// 获取完整的API URL
+function getFullApiUrl(provider, model) {
+    const baseUrl = getApiBaseUrl(provider);
+    
+    // Google API需要特殊处理，其他提供商直接使用基础URL
+    if (provider === 'Google') {
+        return `${baseUrl}${model}:generateContent`;
+    }
+    
+    return baseUrl;
+}
+
+// 检查API错误响应
+function checkErrorResponse(provider, resp) {
+    if (resp.data) {
+        if (provider === 'xAI' && resp.data.error && resp.data.error.includes("Invalid token")) {
+            return {
+                type: "secretKey",
+                message: "配置错误 - 请确保您在插件配置中填入了正确的xAI API Key",
+                addition: "请在插件配置中填写正确的 API Key (格式: xai-xxxxxxxxxxxxxxxxxxxxxxxx)"
+            };
+        }
+        
+        if (provider === 'OpenAI' && resp.data.error && resp.data.error.message && resp.data.error.message.includes("API key")) {
+            return {
+                type: "secretKey",
+                message: "配置错误 - 请确保您在插件配置中填入了正确的OpenAI API Key",
+                addition: "请在插件配置中填写正确的 API Key (格式: sk-xxxxxxxxxxxxxxxxxxxxxxxx)"
+            };
+        }
+        
+        if (provider === 'Anthropic' && resp.data.error && resp.data.error.type === "authentication_error") {
+            return {
+                type: "secretKey",
+                message: "配置错误 - 请确保您在插件配置中填入了正确的Anthropic API Key",
+                addition: "请在插件配置中填写正确的 API Key"
+            };
+        }
+        
+        if (provider === 'Google' && resp.data.error && resp.data.error.message && resp.data.error.message.includes("API key")) {
+            return {
+                type: "secretKey",
+                message: "配置错误 - 请确保您在插件配置中填入了正确的Google API Key",
+                addition: "请在插件配置中填写正确的 API Key"
+            };
+        }
+        
+        if (provider === 'DeepSeek' && resp.data.error && resp.data.error.message && resp.data.error.message.includes("API key")) {
+            return {
+                type: "secretKey",
+                message: "配置错误 - 请确保您在插件配置中填入了正确的DeepSeek API Key",
+                addition: "请在插件配置中填写正确的 API Key (格式: sk-xxxxxxxxxxxxxxxxxxxxxxxx)"
+            };
+        }
+    }
+    
+    // 通用错误
     return {
-        params,
+        type: resp.response.statusCode >= 400 && resp.response.statusCode < 500 ? "param" : "api",
+        message: `接口响应错误 - ${HTTP_ERROR_CODES[resp.response.statusCode] || `未知错误 (${resp.response.statusCode})`}`,
+        addition: resp.data ? JSON.stringify(resp.data) : "未知错误"
     };
 }
 
 // Bob插件标准翻译函数
 function translate(query, completion) {
-    const { apiKey } = $option;
+    const provider = $option.provider || "xAI";
+    const apiKey = getApiKey();
     const { addRecord, getRecord, hasRecord } = useRecords(query);
-    const { params } = useParams(query);
     
     // 如果有缓存，直接返回
     if (hasRecord()) {
@@ -433,17 +654,18 @@ function translate(query, completion) {
     if (!preCheck(query, completion)) {
         return;
     }
-
+    
     try {
+        const { params } = useParams(query, provider);
+        const headers = getHeaders(provider, apiKey);
+        const selectedModel = getSelectedModel(provider);
+        const apiUrl = getFullApiUrl(provider, selectedModel);
+        
         $http.request({
             method: "POST",
-            url: GROK_API_URL,
+            url: apiUrl,
             timeout: 60,
-            header: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${apiKey}`,
-                "X-Title": "Bob翻译插件"
-            },
+            header: headers,
             body: params,
             handler: function(resp) {
                 if (resp.error) {
@@ -457,19 +679,7 @@ function translate(query, completion) {
                 
                 if (resp.response.statusCode >= 400) {
                     // 处理HTTP错误
-                    const error = {
-                        type: resp.response.statusCode >= 400 && resp.response.statusCode < 500 ? "param" : "api",
-                        message: `接口响应错误 - ${HTTP_ERROR_CODES[resp.response.statusCode] || `未知错误 (${resp.response.statusCode})`}`,
-                        addition: resp.data ? JSON.stringify(resp.data) : "未知错误"
-                    };
-                    
-                    // 检查是否为API Key错误
-                    if (resp.data && (resp.data.error && (resp.data.error.includes("Invalid token") || resp.data.error.includes("Invalid API Key")))) {
-                        error.type = "secretKey";
-                        error.message = "配置错误 - 请确保您在插件配置中填入了正确的xAI API Key";
-                        error.addition = "请在插件配置中填写正确的 API Key (格式: xai-xxxxxxxxxxxxxxxxxxxxxxxx)";
-                    }
-                    
+                    const error = checkErrorResponse(provider, resp);
                     completion({
                         error: error
                     });
@@ -479,7 +689,7 @@ function translate(query, completion) {
                 // 处理成功响应
                 if (resp.data) {
                     try {
-                        const content = resp.data.choices[0].message.content;
+                        const content = extractContentFromResponse(resp.data, provider);
                         if (content) {
                             // 缓存内容
                             addRecord(content);
