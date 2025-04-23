@@ -1,57 +1,113 @@
 # Bob Plugin Grok Translator
 
-这是一个适用于 [Bob](https://bobtranslate.com/) 的翻译插件，利用 xAI 公司的 Grok 模型进行高质量翻译。
+[English](README-en.md) | 简体中文
 
-## 功能特点
+[![GitHub license](https://img.shields.io/github/license/n-AChegYag/bob-plugin-grok-translator)](https://github.com/n-AChegYag/bob-plugin-grok-translator/blob/main/LICENSE)
+[![GitHub stars](https://img.shields.io/github/stars/n-AChegYag/bob-plugin-grok-translator)](https://github.com/n-AChegYag/bob-plugin-grok-translator/stargazers)
+[![GitHub issues](https://img.shields.io/github/issues/n-AChegYag/bob-plugin-grok-translator)](https://github.com/n-AChegYag/bob-plugin-grok-translator/issues)
 
-- 利用 Grok 强大的语言理解能力提供高质量翻译
-- 支持多种语言之间的互译
-- 保留原文格式和语境
-- 低延迟，快速响应
+**Bob Plugin Grok Translator** 是一款为 [Bob](https://bobtranslate.com/) (macOS 翻译和 OCR 软件) 设计的插件，利用 [Grok](https://grok.x.ai/) (xAI) 的强大语言模型提供高质量的翻译服务（方便用掉150美元额度）。
 
-## 安装方法
+## ✨ 功能特性
 
-### 前提条件
+*   **高质量翻译**: 利用 Grok 先进的语言模型进行文本翻译。
+*   **多语言支持**: 支持 Grok 模型所支持的多种语言之间的互译。
+*   **Bob 集成**: 无缝集成到 Bob 应用中，提供便捷的划词翻译和截图翻译体验。
+*   **可配置**: 允许用户配置 API 密钥等参数。
+*   **可扩展**: 易于扩展以支持其他公司的大语言模型。
 
-- macOS 系统
-- 已安装 [Bob 应用](https://bobtranslate.com/)
-- 拥有 xAI Grok API 访问权限和 API 密钥
+## 🚀 安装
 
-### 安装步骤
+1.  **下载插件**:
+    *   前往 [Releases](https://github.com/n-AChegYag/bob-plugin-grok-translator/releases) 页面下载最新的 `.bobplugin` 文件。
+2.  **安装插件**:
+    *   双击下载的 `.bobplugin` 文件，Bob 将自动完成安装。
+    *   或者，打开 Bob 的 `偏好设置` -> `插件`，将 `.bobplugin` 文件拖拽到插件列表中。
+3.  **启用插件**:
+    *   在 Bob 的 `偏好设置` -> `服务` -> `文本翻译` 中，找到 "Grok Translator"，勾选启用。
 
-1. 在 [Release](https://github.com/n-AChegYag/bob-plugin-grok-translator/releases) 页面下载最新版本的插件
-2. 解压后双击 `.bobplugin` 文件将其安装到 Bob 中
-3. 在 Bob 的偏好设置中配置 Grok API 密钥
+## ⚙️ 配置
 
-## 配置说明
+1.  **获取 API 密钥**:
+    *   您需要拥有 Grok (xAI) 的 API 访问权限。请参考 [Grok 官方文档](https://grok.x.ai/) 获取 API 密钥。
+2.  **配置插件**:
+    *   在 Bob 的 `偏好设置` -> `服务` -> `文本翻译` 中，选中 "Grok Translator"。
+    *   在右侧的配置界面中，填入您的 Grok API 密钥。
+    *   (可选) 根据需要调整其他配置项。
 
-1. 打开 Bob 偏好设置
-2. 前往「翻译」选项卡
-3. 找到「Grok AI 翻译插件」服务
-4. 填入你的 Grok API 密钥
+## 模型支持
 
-## 使用方法
+当前版本集成了以下公司提供的语言模型：
 
-1. 选择需要翻译的文本
-2. 呼出 Bob 翻译窗口（通过快捷键或悬浮图标）
-3. 选择 Grok 作为翻译服务
-4. 获取翻译结果
+*   **[xAI](https://x.ai/)**:
+    *   `grok-3-beta`
+    *   `grok-3-fast-beta`
+    *   `grok-3-mini-beta`
+    *   `grok-3-mini-fast-beta`
+*   **[OpenAI](https://openai.com/)**:
+    *   `gpt-4o`
+    *   `gpt-4o-mini`
+    *   `gpt-4.1`
+    *   `gpt-4.1-mini`
+    *   `gpt-4.1-nano`
+    *   `gpt-4.5-preview`
+    *   `o1-preview`
+    *   `o1-mini`
+*   **[Google](https://ai.google/)**:
+    *   `gemini-1.5-pro`
+    *   `gemini-1.5-flash`
+    *   `gemini-2.0-flash`
+    *   `gemini-2.5-flash-preview-04-17`
+    *   `gemini-2.5-pro-preview-03-25`
+*   **[Anthropic](https://www.anthropic.com/)**:
+    *   `claude-3-5-haiku-latest`
+    *   `claude-3-7-sonnet-latest`
+*   **[DeepSeek](https://www.deepseek.com/)**:
+    *   `deepseek-chat`
+    *   `deepseek-reasoner`
 
-## 开发与贡献
+您需要在插件配置中为想要使用的模型提供相应的 API 密钥和选择正确的服务提供商。
 
-欢迎对此项目做出贡献！如果你想参与开发：
+我们欢迎社区贡献，以支持更多来自不同公司的优秀语言模型。请参考 [贡献](#-贡献) 部分了解如何添加新的模型支持。
 
-1. Fork 本仓库
-2. 创建你的特性分支 (`git checkout -b feature/amazing-feature`)
-3. 提交你的更改 (`git commit -m 'Add some amazing feature'`)
-4. 推送到分支 (`git push origin feature/amazing-feature`)
-5. 开启一个 Pull Request
+## 💡 使用
 
-## 许可证
+*   **划词翻译**: 在 macOS 中选中需要翻译的文本，按下 Bob 设定的划词翻译快捷键 (默认为 `⌥ + D`)。
+*   **截图翻译**: 按下 Bob 设定的截图翻译快捷键 (默认为 `⌥ + S`)，截取包含文本的区域。
+*   **输入翻译**: 按下 Bob 设定的主界面快捷键 (默认为 `⌥ + A`)，在输入框中输入文本进行翻译。
 
-该项目采用 MIT 许可证 - 详情见 [LICENSE](LICENSE) 文件
+确保在 Bob 的服务设置中，将 Grok Translator 设置为默认或启用的翻译服务之一。
 
-## 致谢
+## 🤝 贡献
 
-- [Bob 翻译](https://bobtranslate.com/) - 提供了优秀的翻译平台
-- [xAI Grok](https://x.ai/) - 提供强大的 AI 模型支持
+欢迎各种形式的贡献！
+
+*   **报告 Bug**: 如果您在使用中遇到问题，请通过 [Issues](https://github.com/n-AChegYag/bob-plugin-grok-translator/issues) 提交 Bug 报告。
+*   **提出建议**: 如果您有功能建议或改进想法，欢迎在 [Issues](https://github.com/n-AChegYag/bob-plugin-grok-translator/issues) 中提出。
+*   **提交代码**:
+    1.  Fork 本仓库。
+    2.  创建新的特性分支 (`git checkout -b feature/AmazingFeature`)。
+    3.  提交您的更改 (`git commit -m 'Add some AmazingFeature'`)。
+    4.  将分支推送到 GitHub (`git push origin feature/AmazingFeature`)。
+    5.  创建 Pull Request。
+
+### ✨ 新增其他语言模型支持
+
+本插件设计时考虑了可扩展性，方便添加对其他公司大语言模型的支持。如果您希望贡献新的翻译服务提供商，可以按照以下步骤进行：
+
+1.  **创建新的服务文件**: 在 `src/` 目录下，参考 `grok.js` 的结构，创建一个新的 JavaScript 文件 (例如 `new_model.js`)。
+2.  **实现翻译逻辑**: 在新文件中，实现与目标语言模型 API 交互的逻辑，需要包含必要的函数，如 `translate` 等，并遵循 Bob 插件的 API 规范。
+3.  **更新 `info.json`**: 修改 `info.json` 文件，添加新的服务配置或根据需要调整现有配置。
+4.  **更新 `app.js` (如果需要)**: 如果新的模型需要不同的初始化或处理逻辑，可能需要修改 `app.js` 文件。
+5.  **测试**: 确保新的语言模型集成能够正常工作。
+6.  **提交 Pull Request**: 按照上述代码贡献流程提交您的更改。
+
+我们鼓励社区成员扩展此插件的功能，集成更多优秀的翻译引擎！
+
+## 📄 许可证
+
+本项目采用 [MIT License](LICENSE) 开源。
+
+---
+
+*免责声明: 本插件是基于 Grok (xAI) API 开发的第三方工具，与 xAI 公司无直接关联。请遵守 Grok 的服务条款和使用政策。*
