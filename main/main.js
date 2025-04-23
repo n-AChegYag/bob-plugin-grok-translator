@@ -532,7 +532,7 @@ const preCheck = (query, completion) => {
         }
     }
     
-    // 检查目标语言是否支持
+    // 仅检查目标语言是否支持，与原始仓库保持一致
     if (!langMap.get(query.detectTo)) {
         completion({
             error: {
@@ -677,6 +677,61 @@ function extractContentFromResponse(data, provider) {
     }
 }
 
+// 准备API请求参数
+function useParams(query, provider) {
+    const selectedModel = getSelectedModel(provider);
+    
+    const params = {
+        model: selectedModel,
+        messages: [
+            {
+                role: "system",
+                content: generateSystemPrompt(query),
+            },
+            {
+                role: "user",
+                content: generatePrompt(query),
+            },
+        ],
+        temperature: parseFloat($option.temperature || "0.3"),
+        max_tokens: parseInt($option.maxTokens || "2000"),
+    };
+
+    // 针对不同提供商调整参数格式
+    if (provider === 'Google') {
+        // Google API需要特殊的请求格式
+        return {
+            params: {
+                contents: [
+                    {
+                        parts: [
+                            {
+                                text: generatePrompt(query)
+                            }
+                        ]
+                    }
+                ],
+                generationConfig: {
+                    temperature: parseFloat($option.temperature || "0.3"),
+                    maxOutputTokens: parseInt($option.maxTokens || "2000"),
+                    topP: 0.95
+                }
+            }
+        };
+    } else if (provider === 'Anthropic') {
+        params.system = generateSystemPrompt(query);
+        params.messages = [
+            {
+                role: "user",
+                content: generatePrompt(query)
+            }
+        ];
+        params.max_tokens = parseInt($option.maxTokens || "2000");
+    }
+    
+    return { params };
+}
+
 // Bob插件标准翻译函数
 function translate(query, completion) {
     const provider = $option.provider || "xAI";
@@ -708,79 +763,83 @@ function translate(query, completion) {
         const headers = getHeaders(provider, apiKey);
         const selectedModel = getSelectedModel(provider);
         const apiUrl = getFullApiUrl(provider, selectedModel);
-        
+
+        // 发起HTTP请求
         $http.request({
             method: "POST",
             url: apiUrl,
-            timeout: 60,
+            timeout: 60, // 请求超时时间
             header: headers,
             body: params,
+            // 处理响应的回调函数
             handler: function(resp) {
+                // 检查请求本身是否出错 (e.g., network error)
                 if (resp.error) {
                     handleGeneralError(query, completion, {
-                        type: "api",
-                        message: resp.error,
-                        addition: "请求API时发生错误"
+                        type: resp.error.type || "api", // Use error type if available
+                        message: resp.error.message || "请求API时发生网络或未知错误",
+                        addition: `Error details: ${JSON.stringify(resp.error)}`
                     });
                     return;
                 }
-                
+
+                // 检查HTTP状态码是否表示错误
                 if (resp.response.statusCode >= 400) {
-                    // 处理HTTP错误
-                    const error = checkErrorResponse(provider, resp);
-                    completion({
-                        error: error
-                    });
+                    const error = checkErrorResponse(provider, resp); // Get specific error details
+                    completion({ error: error });
                     return;
                 }
-                
-                // 处理成功响应
+
+                // 处理成功的响应 (status code 2xx)
                 if (resp.data) {
                     try {
                         const content = extractContentFromResponse(resp.data, provider);
                         if (content) {
-                            // 缓存内容
-                            addRecord(content);
-                            // 返回翻译结果
+                            addRecord(content); // Cache the result
                             completion({
                                 result: {
                                     from: query.detectFrom,
                                     to: query.detectTo,
-                                    toParagraphs: [content],
+                                    toParagraphs: [content], // Bob expects paragraphs
                                 },
                             });
                         } else {
+                            // API returned data, but content extraction failed or was empty
                             completion({
                                 error: {
                                     type: "api",
-                                    message: "API返回的内容为空",
-                                    addition: "请重试或联系开发者"
+                                    message: "API成功响应，但未能提取有效内容",
+                                    addition: `Raw data: ${JSON.stringify(resp.data)}`
                                 }
                             });
                         }
-                    } catch (error) {
+                    } catch (parseError) {
+                        // Error during content extraction
                         handleGeneralError(query, completion, {
                             type: "api",
                             message: "解析API响应时发生错误",
-                            addition: error.message || "未知错误"
+                            addition: parseError.message || "未知解析错误"
                         });
                     }
                 } else {
+                    // Successful status code but no data in response body
                     completion({
                         error: {
                             type: "api",
-                            message: "API返回的数据为空",
-                            addition: "请重试或联系开发者"
-                        });
-                    }
+                            message: "API成功响应，但返回的数据为空",
+                            addition: `Status code: ${resp.response.statusCode}`
+                        }
+                    });
                 }
-            }
-        });
-    } catch (error) {
+            } // end of handler function
+        }); // end of $http.request call
+
+    } catch (requestSetupError) {
+        // Error occurred before the HTTP request was even sent (e.g., in useParams, getHeaders)
         handleGeneralError(query, completion, {
-            type: "api",
-            message: error instanceof Error ? error.message : "未知错误",
-            addition: "发起HTTP请求时发生错误",
+            type: "param", // Likely a setup issue
+            message: requestSetupError instanceof Error ? requestSetupError.message : "发起请求前发生未知错误",
+            addition: "请检查插件配置或函数调用",
         });
     }
 }
